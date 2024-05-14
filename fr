@@ -1,4 +1,4 @@
-   getgenv().Settings.FileName = "t"
+
     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Ready"):FireServer()
     
     local function FindTowerPlacePrice(TowerID)
@@ -50,6 +50,6 @@
     
     spawn(function()
     while task.wait() do 
-        writefile(getgenv().Settings.FileName .. ".txt", httpService:JSONEncode(towerRecord))
+        writefile("t.txt", httpService:JSONEncode(towerRecord))
         end
     end)
