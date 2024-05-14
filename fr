@@ -1,13 +1,14 @@
 
     game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Ready"):FireServer()
     
-    local function FindTowerPlacePrice(TowerID)
-        for i,v in pairs(game:GetService("Players").LocalPlayer.Units:GetDescendants()) do
-            if v.RealName.Value == TowerID then
-                return v.Price.Value
+    local function GetPlacePrice(TowerID)
+        for i,v in pairs(game:GetService("Players").LocalPlayer.Units[TowerID]:GetChildren()) do
+            if v.Name == "Price" then
+        return v.Value
             end
         end
-    end
+    end 
+
     local str = game:GetService("Players").LocalPlayer.PlayerGui.Select.UnitInfoFrame.UpGrade.Upgrade.Text
     local numberFromString = string.match(str, "%d+")
     local number = tonumber(numberFromString) 
@@ -27,14 +28,14 @@
                 ["position"] = tostring(args[2]); 
                 ["unitid"] = tostring(args[4]);
                 ["type"] = "CreateUnit";
-                ["moneyreq"] = FindTowerPlacePrice(tostring(args[4]));
+                ["moneyreq"] = tostring(GetPlacePrice(tostring(args[4])));
             }    
         elseif getnamecallmethod() == "FireServer" and tostring(self) == "Upgrades" then
             towerRecord[#towerRecord + 1] = {
                 ["time"] = tick() - startTime; 
                 ["character"] = args[1].Name; 
                 ["type"] = "UpgradeUnit";
-                ["moneyreq"] = number
+                ["moneyreq"] = number;
             }    
         elseif getnamecallmethod() == "FireServer" and tostring(self) == "SellUnit" then
             towerRecord[#towerRecord + 1] = {
