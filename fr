@@ -1,0 +1,55 @@
+   getgenv().Settings.FileName = "t"
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Ready"):FireServer()
+    
+    local function FindTowerPlacePrice(TowerID)
+        for i,v in pairs(game:GetService("Players").LocalPlayer.Units:GetDescendants()) do
+            if v.RealName.Value == TowerID then
+                return v.Price.Value
+            end
+        end
+    end
+    local str = game:GetService("Players").LocalPlayer.PlayerGui.Select.UnitInfoFrame.UpGrade.Upgrade.Text
+    local numberFromString = string.match(str, "%d+")
+    local number = tonumber(numberFromString) 
+
+    local startTime = tick()
+    local towerRecord = {}
+    local httpService = game:GetService("HttpService")
+    local mt = getrawmetatable(game)
+    local oldNamecall = mt.__namecall
+    setreadonly(mt, false)
+    mt.__namecall = newcclosure(function(self, ...)
+        args = {...}
+        if getnamecallmethod() == "FireServer" and tostring(self) == "CreateUnits" then
+            towerRecord[#towerRecord + 1] = {
+                ["time"] = tick() - startTime; 
+                ["character"] = args[1]; 
+                ["position"] = tostring(args[2]); 
+                ["unitid"] = tostring(args[4]);
+                ["type"] = "CreateUnit";
+                ["moneyreq"] = FindTowerPlacePrice(tostring(args[4]));
+            }    
+        elseif getnamecallmethod() == "FireServer" and tostring(self) == "Upgrades" then
+            towerRecord[#towerRecord + 1] = {
+                ["time"] = tick() - startTime; 
+                ["character"] = args[1].Name; 
+                ["type"] = "UpgradeUnit";
+                ["moneyreq"] = number
+            }    
+        elseif getnamecallmethod() == "FireServer" and tostring(self) == "SellUnit" then
+            towerRecord[#towerRecord + 1] = {
+                ["time"] = tick() - startTime; 
+                ["character"] = args[1].Name; 
+                ["type"] = "SellUnit";
+            }    
+        end
+    
+        return oldNamecall(self, unpack(args))
+    end)
+    setreadonly(mt, true)
+    
+    spawn(function()
+    while task.wait() do 
+        writefile(getgenv().Settings.FileName .. ".txt", httpService:JSONEncode(towerRecord))
+        end
+    end)
